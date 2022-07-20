@@ -9,16 +9,71 @@ class Forca {
     this.palavra = this.mostraTracos(this.palavraSecreta); //array com as letras que já foram acertadas ou o valor "_" para as letras não identificadas
   }
 
-  chutar(letra) { }
+  chutar(letra) {
+    if (/[a-zA-Z]/.test(letra) && letra.length == 1) { //garantindo que o chute só será aceito caso seja apenas uma letra (regra 3)
+      const chute = letra.toLowerCase();
+      const letrasChutadas = this.letrasChutadas;
 
-  buscarEstado() { return ""; } // Possiveis valores: "perdeu", "aguardando chute" ou "ganhou"
+      for (let i = 0; i < letrasChutadas.length; i++) {
+        if (chute == letrasChutadas[i]) return;
+      }
+
+      letrasChutadas.push(chute); // 5. Toda chamada ao método chutar deve registrar a letra em letrasChutadas
+
+      this.palavra = this.mostraLetraCorreta(chute); // regra 7 OK.
+
+      const caracteres = this.caracteres;
+
+      if (caracteres.indexOf(chute) < 0) this.vidas -= 1; // regra 6 OK.
+    }
+  }
+
+  buscarEstado() {  // Possiveis valores: "perdeu", "aguardando chute" ou "ganhou"
+    const vidas = this.vidas;
+    if (vidas <= 0) return "perdeu";
+
+    const acertos = this.acertos;
+    const caracteres = this.caracteres;
+    if (acertos.length >= caracteres.length) return "ganhou";
+
+    return "aguardando chute";
+  }
 
   buscarDadosDoJogo() {
-      return {
-          letrasChutadas: [], // Deve conter todas as letras chutadas
-          vidas: 6, // Quantidade de vidas restantes
-          palavra: [] // Deve ser um array com as letras que já foram acertadas ou o valor "_" para as letras não identificadas
+    const letrasChutadas = this.letrasChutadas;
+    const vidas = this.vidas;
+    const palavra = this.palavra;
+
+    return {
+      letrasChutadas,
+      vidas,
+      palavra
+    }
+  }
+
+  mostraTracos(palavra) {
+    const arrPalavra = palavra.split("");
+
+    arrPalavra.forEach((caractere) => {
+      const index = arrPalavra.indexOf(caractere);
+
+      if (index != -1) arrPalavra[index] = "_";
+    });
+
+    return arrPalavra;
+  }
+
+  mostraLetraCorreta(letra) {
+    const caracteres = this.caracteres;
+    const tracos = this.palavra;
+
+    for (let i = 0; i < caracteres.length; i++) {
+      if (letra == caracteres[i]) {
+        tracos[i] = letra;
+        this.acertos.push(letra);
       }
+    }
+    return tracos
   }
 }
 
